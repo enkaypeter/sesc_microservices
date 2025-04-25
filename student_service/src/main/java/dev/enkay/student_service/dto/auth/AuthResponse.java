@@ -1,5 +1,8 @@
 package dev.enkay.student_service.dto.auth;
 
+import lombok.Data;
+
+@Data
 public class AuthResponse {
   private TokenInfo token;
   private UserInfo user;
