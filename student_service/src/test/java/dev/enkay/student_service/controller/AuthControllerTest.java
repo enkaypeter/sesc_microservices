@@ -42,17 +42,23 @@ class AuthControllerTest {
   @Test
   @WithMockUser
   void shouldRegisterSuccessfully() throws Exception {
-    // Arrange
-    RegisterRequest request = new RegisterRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
+      RegisterRequest request = new RegisterRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
 
-    when(authService.register(any())).thenReturn(MOCK_REGISTER_SUCCESS);
+      TokenInfo tokenInfo = new TokenInfo(MOCK_JWT_TOKEN, 86400L);
+      UserInfo userInfo = new UserInfo(MOCK_USER_ID, MOCK_EMAIL, "STUDENT");
+      AuthResponse response = new AuthResponse(tokenInfo, userInfo, "Registration successful");
 
-    // Act + Assert
-    mockMvc.perform(post("/api/auth/register")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
-        .andExpect(content().string(MOCK_REGISTER_SUCCESS));
+      when(authService.register(any())).thenReturn(response);
+
+      mockMvc.perform(post("/api/auth/register")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request)))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.token.accessToken").value(MOCK_JWT_TOKEN))
+          .andExpect(jsonPath("$.token.expiresAt").value(86400))
+          .andExpect(jsonPath("$.user.email").value(MOCK_EMAIL))
+          .andExpect(jsonPath("$.user.role").value("STUDENT"))
+          .andExpect(jsonPath("$.message").value("Registration successful"));
   }
 
   @Test
@@ -62,7 +68,7 @@ class AuthControllerTest {
     LoginRequest request = new LoginRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
 
     TokenInfo tokenInfo = new TokenInfo(MOCK_JWT_TOKEN, 86400L);
-    UserInfo userInfo = new UserInfo(MOCK_EMAIL, "STUDENT");
+    UserInfo userInfo = new UserInfo(MOCK_USER_ID, MOCK_EMAIL, "STUDENT");
 
     AuthResponse response = new AuthResponse(tokenInfo, userInfo, MOCK_LOGIN_SUCCESS);
 

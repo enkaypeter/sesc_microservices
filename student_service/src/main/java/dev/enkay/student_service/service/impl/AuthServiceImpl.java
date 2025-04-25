@@ -15,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import dev.enkay.student_service.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,7 +25,6 @@ public class AuthServiceImpl implements AuthService {
   private final AuthenticationManager authenticationManager;
   private final JwtService jwtService;
 
-  @Autowired
   public AuthServiceImpl(UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       AuthenticationManager authenticationManager,
@@ -38,7 +36,8 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public String register(RegisterRequest request) {
+  public AuthResponse register(RegisterRequest request) {
+    // TODO: return a custom response object
     if (userRepository.existsByEmail(request.email)) {
       throw new IllegalArgumentException("Email is already registered.");
     }
@@ -49,7 +48,14 @@ public class AuthServiceImpl implements AuthService {
     user.setRole("STUDENT"); // default role
 
     userRepository.save(user);
-    return "User registered successfully.";
+
+    String token = jwtService.generateToken(user);
+    Long expiry = jwtService.getExpiry(token);
+
+    TokenInfo tokenInfo = new TokenInfo(token, expiry);
+    UserInfo userInfo = new UserInfo(user.getId(), user.getEmail(), user.getRole());
+
+    return new AuthResponse(tokenInfo, userInfo, "Registration successful");
   }
 
   @Override
@@ -63,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
     Long expiry = jwtService.getExpiry(token);
 
     return new AuthResponse(new TokenInfo(token, expiry), 
-      new UserInfo(user.getEmail(), user.getRole()), 
+      new UserInfo(user.getId(), user.getEmail(), user.getRole()), 
       "Login successful");
   }
 }

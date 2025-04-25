@@ -1,12 +1,15 @@
 package dev.enkay.student_service.dto.auth;
 
+import lombok.Data;
+
+@Data 
 public class UserInfo {
+  private Long id;
   private String email;
   private String role;
-  // private String firstName;
-  // private String lastName;
 
-  public UserInfo(String email, String role) {
+  public UserInfo(Long id, String email, String role) {
+    this.id = id;
     this.email = email;
     this.role = role;
   }
@@ -18,12 +21,4 @@ public class UserInfo {
   public String getRole() {
     return role;
   }
-
-  // public String getFirstName() {
-  //   return firstName;
-  // }
-
-  // public String getLastName() {
-  //   return lastName;
-  // }
 }

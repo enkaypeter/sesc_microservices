@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,11 +55,25 @@ class AuthServiceTest {
     void shouldRegisterUserSuccessfully() {
         RegisterRequest request = new RegisterRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
 
-        given(passwordEncoder.encode(any())).willReturn(MOCK_ENCODED_PASSWORD);
-        given(userRepository.save(any())).willAnswer(i -> i.getArguments()[0]);
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(MOCK_ENCODED_PASSWORD);
+        user.setRole("STUDENT");
 
-        String registrationMessage = authService.register(request);
-        assertThat(registrationMessage).isEqualTo(MOCK_REGISTER_SUCCESS);
+        given(userRepository.existsByEmail(request.getEmail())).willReturn(false);
+        given(passwordEncoder.encode(request.getPassword())).willReturn(MOCK_ENCODED_PASSWORD);
+        given(userRepository.save(any(User.class))).willAnswer(invocation -> invocation.getArgument(0));
+        given(jwtService.generateToken(any(User.class))).willReturn(MOCK_JWT_TOKEN);
+        given(jwtService.getExpiry(anyString())).willReturn(86400L);
+
+
+        AuthResponse response = authService.register(request);
+
+        assertThat(response.getToken().getAccessToken()).isEqualTo(MOCK_JWT_TOKEN);
+        assertThat(response.getToken().getExpiresAt()).isEqualTo(86400L);
+        assertThat(response.getUser().getEmail()).isEqualTo(MOCK_EMAIL);
+        assertThat(response.getUser().getRole()).isEqualTo("STUDENT");
+        assertThat(response.getMessage()).isEqualTo("Registration successful");
     }
 
     @Test

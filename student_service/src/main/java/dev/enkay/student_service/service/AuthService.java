@@ -5,6 +5,6 @@ import dev.enkay.student_service.dto.auth.LoginRequest;
 import dev.enkay.student_service.dto.auth.AuthResponse;
 
 public interface AuthService {
-  String register(RegisterRequest request);
+  AuthResponse register(RegisterRequest request);
   AuthResponse login(LoginRequest request);
 }
