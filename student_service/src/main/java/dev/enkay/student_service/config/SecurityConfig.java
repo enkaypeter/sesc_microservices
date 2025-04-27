@@ -31,29 +31,16 @@ public class SecurityConfig {
     return config.getAuthenticationManager();
   }
 
+
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-      http
-          .csrf(csrf -> csrf.disable())
-          .authorizeHttpRequests(auth -> auth
-              .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-              .anyRequest().authenticated()
-          )
-          .formLogin(form -> form.disable())
-          .logout(logout -> logout.disable());
-
-      return http.build();
-  }
-
-  // @Bean
-  // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-  //   http
-  //     .csrf(csrf -> csrf.disable())
-  //     .authorizeHttpRequests(auth -> auth
-  //       .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-  //       .anyRequest().authenticated()
-  //     );
+    http
+      .csrf(csrf -> csrf.disable())
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+        .anyRequest().authenticated()
+      );
     
-  //   return http.build();
-  // }
+    return http.build();
+  }
 }
