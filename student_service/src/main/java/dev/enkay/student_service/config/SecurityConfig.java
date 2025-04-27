@@ -13,7 +13,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
   private static final String[] PUBLIC_ENDPOINTS = {
-    "/api/auth/**"
+    "/api/auth/**",
+    "/api/courses/**",
+    "/swagger-ui/**",
+    "/swagger-ui.html",
+    "/v3/api-docs",
+    "/v3/api-docs/**",
   };
 
   @Bean
@@ -25,6 +30,7 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();
   }
+
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
