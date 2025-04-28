@@ -5,6 +5,8 @@ import dev.enkay.student_service.dto.enrolment.CourseInfoInEnrolment;
 import dev.enkay.student_service.dto.enrolment.EnrolmentResponse;
 import dev.enkay.student_service.entity.Enrolment;
 import dev.enkay.student_service.entity.Student;
+import dev.enkay.student_service.events.StudentCreatedEvent;
+import dev.enkay.student_service.events.StudentEventPublisher;
 import dev.enkay.student_service.repository.CourseRepository;
 import dev.enkay.student_service.repository.EnrolmentRepository;
 import dev.enkay.student_service.repository.StudentRepository;
@@ -23,13 +25,15 @@ public class EnrolmentServiceImpl implements EnrolmentService {
   private final EnrolmentRepository enrolmentRepository;
   private final StudentRepository studentRepository;
   private final UserService userService;
+  private final StudentEventPublisher studentEventPublisher;
 
   public EnrolmentServiceImpl(CourseRepository courseRepository, EnrolmentRepository enrolmentRepository,
-    StudentRepository studentRepository, UserService userService) {
+    StudentRepository studentRepository, UserService userService, StudentEventPublisher studentEventPublisher) {
     this.courseRepository = courseRepository;
     this.enrolmentRepository = enrolmentRepository;
     this.studentRepository = studentRepository;
     this.userService = userService;
+    this.studentEventPublisher = studentEventPublisher;
   }
 
   @Override
@@ -39,19 +43,22 @@ public class EnrolmentServiceImpl implements EnrolmentService {
 
     // Get or create student profile
     var student = studentRepository.findByUser(user)
-        .orElseGet(() -> {
-          Student newStudent = new Student();
-          newStudent.setUser(user);
-          return studentRepository.save(newStudent);
-        });
+      .orElseGet(() -> {
+        Student newStudent = new Student();
+        newStudent.setUser(user);
+        Student savedStudent = studentRepository.save(newStudent);
+
+        studentEventPublisher.publishStudentCreated(new StudentCreatedEvent(savedStudent.getId(), "", user.getEmail()));
+        return savedStudent;
+      });
 
     var course = courseRepository.findById(request.getCourseId())
-        .orElseThrow(() -> new IllegalArgumentException("Course not found."));
+      .orElseThrow(() -> new IllegalArgumentException("Course not found."));
 
     enrolmentRepository.findByStudentAndCourse(student, course)
-        .ifPresent(e -> {
-          throw new IllegalStateException("Already enrolled in this course.");
-        });
+      .ifPresent(e -> {
+        throw new IllegalStateException("Already enrolled in this course.");
+      });
 
     var enrolment = new Enrolment();
     enrolment.setStudent(student);
@@ -60,30 +67,30 @@ public class EnrolmentServiceImpl implements EnrolmentService {
     var savedEnrolment = enrolmentRepository.save(enrolment);
 
     return new EnrolmentResponse(
-        savedEnrolment.getId(),
-        new CourseInfoInEnrolment(
-            course.getId(),
-            course.getCode(),
-            course.getTitle(),
-            course.getDescription()));
+      savedEnrolment.getId(),
+      new CourseInfoInEnrolment(
+        course.getId(),
+        course.getCode(),
+        course.getTitle(),
+        course.getDescription()));
   }
 
   @Override
   public List<EnrolmentResponse> getEnrolments() {
     var user = userService.getCurrentUser();
     var student = studentRepository.findByUser(user)
-        .orElseThrow(() -> new IllegalArgumentException("Student profile not found."));
+      .orElseThrow(() -> new IllegalArgumentException("Student profile not found."));
 
     var enrolments = enrolmentRepository.findByStudent(student);
 
     return enrolments.stream()
-        .map(e -> new EnrolmentResponse(
-            e.getId(),
-            new CourseInfoInEnrolment(
-                e.getCourse().getId(),
-                e.getCourse().getCode(),
-                e.getCourse().getTitle(),
-                e.getCourse().getDescription())))
-        .collect(Collectors.toList());
+      .map(e -> new EnrolmentResponse(
+        e.getId(),
+        new CourseInfoInEnrolment(
+          e.getCourse().getId(),
+          e.getCourse().getCode(),
+          e.getCourse().getTitle(),
+          e.getCourse().getDescription())))
+    .collect(Collectors.toList());
   }
 }
