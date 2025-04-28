@@ -15,6 +15,6 @@ public class OpenApiConfig {
             .title("Student Service API")
             .version("v0.1.0")
             .description(
-                "A simple service to manage student's courses, enrollments and graduations."));
+                "A microservice to manage student's courses, enrolments and graduations."));
   }
 }

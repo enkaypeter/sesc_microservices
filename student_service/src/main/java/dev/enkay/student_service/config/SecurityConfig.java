@@ -1,5 +1,7 @@
 package dev.enkay.student_service.config;
 
+import dev.enkay.student_service.security.JwtAuthenticationFilter;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,9 +10,17 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
+
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+  public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+  }
+
 
   private static final String[] PUBLIC_ENDPOINTS = {
     "/api/auth/**",
@@ -39,8 +49,9 @@ public class SecurityConfig {
       .authorizeHttpRequests(auth -> auth
         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
         .anyRequest().authenticated()
-      );
-    
+      )
+      .securityContext(context -> context.requireExplicitSave(false))
+      .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 }
