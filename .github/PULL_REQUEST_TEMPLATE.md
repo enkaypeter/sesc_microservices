@@ -1,5 +1,3 @@
-# 🚀 Pull Request: [Feature Title or Bug Fix]
-
 ## 🔥 What’s Changing?
 Briefly explain:
 - What feature you built or what bug you fixed.
