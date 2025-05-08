@@ -1,6 +1,7 @@
 CREATE TABLE courses (
-  id BIGSERIAL PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   code VARCHAR(20) NOT NULL UNIQUE,
   title VARCHAR(255) NOT NULL,
-  description TEXT
+  description TEXT,
+  fees DECIMAL(10, 2) NOT NULL
 );

@@ -7,7 +7,7 @@ student_service/target/
 # Config & Secrets
 student_service/.env
 student_service/application.properties
-student_service/docker-compose/.env
+docker-compose/*.env
 
 # OS files
 .DS_Store
