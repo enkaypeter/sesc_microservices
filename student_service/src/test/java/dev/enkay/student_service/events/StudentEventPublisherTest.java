@@ -1,8 +1,5 @@
 package dev.enkay.student_service.events;
 
-import dev.enkay.student_service.events.StudentCreatedEvent;
-import dev.enkay.student_service.events.StudentEventPublisher;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

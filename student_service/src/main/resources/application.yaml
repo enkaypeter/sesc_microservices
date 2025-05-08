@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: student-service
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/student_service_db}
+    username: ${DATABASE_USER:student}
+    password: ${DATABASE_PASSWORD:secret}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:consul}
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        prefer-ip-address: false
+        register: true
+        deregister: true
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+
+rabbitmq:
+  student:
+    exchange: ${RABBITMQ_STUDENT_EXCHANGE:student.exchange}
+    routing-key: ${RABBITMQ_STUDENT_ROUTING_KEY:student.created}
+    queue: ${RABBITMQ_STUDENT_QUEUE:student.created.queue}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET_KEY:dev-secret-key-123456789}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+services:
+  gateway:
+    base-url: ${GATEWAY_URL:http://api-gateway:80}
