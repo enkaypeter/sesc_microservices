@@ -32,8 +32,8 @@ class CourseServiceTest {
   @Test
   void shouldReturnAllCoursesSuccessfully() {
     // Arrange
-    Course course1 = new Course(1L, "CSC701", "Advanced AI", "Deep learning, ML, real-world AI systems");
-    Course course2 = new Course(2L, "CSC702", "Distributed Systems", "Architectures and performance");
+    Course course1 = new Course(1L, "CSC701", "Advanced AI", "Deep learning, ML, real-world AI systems", 300.0);
+    Course course2 = new Course(2L, "CSC702", "Distributed Systems", "Architectures and performance", 350.0);
 
     List<Course> courses = Arrays.asList(course1, course2);
 
