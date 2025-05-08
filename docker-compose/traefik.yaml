@@ -1,0 +1,25 @@
+http:
+  routers:
+    library:
+      rule: "Host(`library.local`)"
+      entryPoints:
+        - web
+      service: api-gateway
+
+    finance:
+      rule: "Host(`finance.local`)"
+      entryPoints:
+        - web
+      service: api-gateway
+
+    students:
+      rule: "Host(`students.local`)"
+      entryPoints:
+        - web
+      service: api-gateway
+
+  services:
+    api-gateway:
+      loadBalancer:
+        servers:
+          - url: "http://api-gateway:80"

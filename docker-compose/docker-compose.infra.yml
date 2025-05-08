@@ -1,0 +1,102 @@
+services:
+  postgres_student:
+    image: postgres:14.0-alpine
+    container_name: student_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${STUDENT_DB_USER}
+      POSTGRES_PASSWORD: ${STUDENT_DB_PASSWORD}
+      POSTGRES_DB: ${STUDENT_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - student_postgres_data:/var/lib/postgresql/data
+    networks:
+      - sesc_infra_net
+
+  mariadb_finance:
+    image: mariadb
+    container_name: finance_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${FINANCE_DB_ROOT_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - finance_mariadb_data:/var/lib/mysql
+      - ../finance_service/migrations/mysql-migrations.sql:/docker-entrypoint-initdb.d/mysql-mysql-migrations.sql
+    networks:
+      - sesc_infra_net
+
+  mariadb_library:
+    image: mariadb
+    container_name: library_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LIBRARY_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${LIBRARY_DB_NAME}
+      MYSQL_USER: ${LIBRARY_DB_APPLICATION_USER}
+      MYSQL_PASSWORD: ${LIBRARY_DB_APPLICATION_PASSWORD}
+    ports:
+      - "3308:3306"
+    volumes:
+      - ../library_service/migrations/mysql-migrations.sql:/docker-entrypoint-initdb.d/mysql-mysql-migrations.sql
+      - library_mariadb_data:/var/lib/mysql
+    networks:
+      - sesc_infra_net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: student_service_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - sesc_infra_net
+
+  consul:
+    image: consul:1.15.4
+    container_name: sesc_consul
+    restart: unless-stopped
+    ports:
+      - "8500:8500"
+    command: agent -dev -client=0.0.0.0
+    networks:
+      - sesc_infra_net
+
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    command:
+      - --entrypoints.web.address=:80                     # plain‑HTTP
+      - --entrypoints.websecure.address=:443              # HTTPS (self‑signed for dev)
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false         # only route labelled containers
+      - --providers.docker.network=sesc_infra_net
+      - --providers.file.directory=/traefik
+      - --providers.file.watch=true
+      - --api.dashboard=true
+      - --entrypoints.traefik.address=:8080
+      - --api.insecure=true                               # dev‑only
+      - --entrypoints.websecure.http.tls=true             
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yaml:/traefik/traefik.yaml:ro
+    networks:
+      - sesc_infra_net
+
+volumes:
+  student_postgres_data:
+  finance_mariadb_data:
+  library_mariadb_data:
+
+networks:
+  sesc_infra_net:
+    external: true
+  sesc_app_net:
+    driver: bridge
