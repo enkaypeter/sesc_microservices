@@ -43,7 +43,7 @@ class EnrolmentControllerTest {
 
     CourseInfoInEnrolment courseInfo = new CourseInfoInEnrolment(1L, "CSC701", "Advanced AI",
         "Deep learning, ML, real-world AI systems");
-    EnrolmentResponse response = new EnrolmentResponse(1L, courseInfo);
+    EnrolmentResponse response = new EnrolmentResponse(1L, "c1122334", null, courseInfo);
 
     given(enrolmentService.enrolInCourse(any())).willReturn(response);
 
@@ -61,7 +61,7 @@ class EnrolmentControllerTest {
   void shouldGetMyEnrolmentsSuccessfully() throws Exception {
     CourseInfoInEnrolment courseInfo = new CourseInfoInEnrolment(1L, "CSC701", "Advanced AI",
         "Deep learning, ML, real-world AI systems");
-    EnrolmentResponse response = new EnrolmentResponse(1L, courseInfo);
+    EnrolmentResponse response = new EnrolmentResponse(1L, "c2233445", null, courseInfo);
 
     given(enrolmentService.getEnrolments()).willReturn(List.of(response));
 

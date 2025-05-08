@@ -22,6 +22,9 @@ public class Student {
 
   @Column(name = "first_name")
   private String firstName;
+
+  @Column(name = "studentId", unique = true)
+  private String studentId;
   
   @Column(name = "last_name")
   private String lastName;

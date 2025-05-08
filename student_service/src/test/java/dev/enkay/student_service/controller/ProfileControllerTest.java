@@ -49,7 +49,7 @@ class ProfileControllerTest {
   @Test
   @WithMockUser
   void shouldReturnProfileSuccessfully() throws Exception {
-    ProfileResponse profile = new ProfileResponse(1L, "user@example.com", "John", "Doe");
+    ProfileResponse profile = new ProfileResponse(1L, "c1133445","user@example.com", "John", "Doe");
 
     when(profileService.getProfile()).thenReturn(profile);
 
@@ -66,7 +66,7 @@ class ProfileControllerTest {
   @WithMockUser
   void shouldUpdateProfileSuccessfully() throws Exception {
     UpdateProfileRequest request = new UpdateProfileRequest("NewName", "NewSurname");
-    ProfileResponse profile = new ProfileResponse(1L, "user@example.com", "NewName", "NewSurname");
+    ProfileResponse profile = new ProfileResponse(1L, "c1133440", "user@example.com", "NewName", "NewSurname");
 
     when(profileService.updateProfile(any())).thenReturn(profile);
 

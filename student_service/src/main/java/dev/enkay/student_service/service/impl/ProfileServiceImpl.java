@@ -30,6 +30,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     return new ProfileResponse(
       student.getId(),
+      student.getStudentId(),
       user.getEmail(),
       student.getFirstName(),
       student.getLastName());
@@ -49,6 +50,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     return new ProfileResponse(
       updatedStudent.getId(),
+      student.getStudentId(),
       user.getEmail(),
       updatedStudent.getFirstName(),
       updatedStudent.getLastName());
