@@ -70,7 +70,7 @@ We orchestrate all services and shared infrastructure using two `docker compose`
 4. **Start Application Services**
 
     ```bash
-    make infra
+    make app
    ```
 
 5. **Verify**
@@ -93,12 +93,12 @@ We orchestrate all services and shared infrastructure using two `docker compose`
 * [ ] **Event-Driven Enhancements:**
 
   * Publish `StudentCreatedEvent` and `InvoiceCreatedEvent` via RabbitMQ.
-  * Implement subscribers in Finance and Library for eventual consistency.
+  * Implement subscribers in Finance and Library for consistency.
 
 
 * [ ] **Observability & Resilience:**
   * Expose Prometheus metrics and add Grafana dashboards.
-  * Enable distributed tracing with OpenTelemetry/Jaeger.
+  * Enable distributed tracing with OpenTelemetry.
 
 * [ ] **CI/CD & Deployment:**
 
