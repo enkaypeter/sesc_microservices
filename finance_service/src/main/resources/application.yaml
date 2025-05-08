@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: finance-service
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    properties:
+      javax.persistence.validation.mode: none
+
+  datasource:
+    url: jdbc:mariadb://db:3308/finance
+    driver-class-name: org.mariadb.jdbc.Driver
+  
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        prefer-ip-address: false
+        register: true
+        deregister: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
