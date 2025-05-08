@@ -70,7 +70,7 @@ We orchestrate all services and shared infrastructure using two `docker compose`
 4. **Start Application Services**
 
     ```bash
-    make infra
+    make app
    ```
 
 5. **Verify**
