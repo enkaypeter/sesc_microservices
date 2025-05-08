@@ -1,6 +1,6 @@
-# 🎓 Student Management Services Repository
+# 🎓 Student Management Services
 
-This repository contains a suite of services for managing student-related activities in an academic context, impelemented as part of an Msc course assessment. 
+This repository contains a suite of backend services for managing student-related activities in an academic context, implemented as part of an Msc course assessment. 
 
 > ⚡ Note: This is a **multi-service repository**. Each service lives in its own directory.
 
@@ -16,7 +16,8 @@ This repository contains a suite of services for managing student-related activi
 
 ---
 
-## 📦 Shared Infrastructure
+## 📦 Infrastructure
+![network_infra_diagram](https://res.cloudinary.com/dc9klxnmy/image/upload/v1746725502/net_infra_diagram_d8uqab.png)
 
 We orchestrate all services and shared infrastructure using two `docker compose` files:
 
