@@ -1,9 +1,11 @@
 package dev.enkay.student_service.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.enkay.student_service.config.SecurityConfig;
 import dev.enkay.student_service.dto.course.CourseResponseDto;
+import dev.enkay.student_service.repository.CourseRepository;
+import dev.enkay.student_service.repository.UserRepository;
+import dev.enkay.student_service.security.JwtService;
 import dev.enkay.student_service.service.CourseService;
 
 import org.junit.jupiter.api.Test;
@@ -32,8 +34,14 @@ class CourseControllerTest {
   @MockBean
   private CourseService courseService;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @MockBean
+  private CourseRepository  courseRepository;
+
+  @MockBean
+  private JwtService jwtService;
+
+  @MockBean
+  private UserRepository  userRepository;
 
   @Test
   void shouldReturnListOfCoursesSuccessfully() throws Exception {

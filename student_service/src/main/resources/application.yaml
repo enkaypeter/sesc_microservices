@@ -23,7 +23,7 @@ spring:
 
   cloud:
     consul:
-      host: ${CONSUL_HOST:consul}
+      host: ${CONSUL_HOST:localhost}
       port: 8500
       discovery:
         service-name: ${spring.application.name}
@@ -45,7 +45,7 @@ rabbitmq:
 
 app:
   jwt:
-    secret: ${JWT_SECRET_KEY:dev-secret-key-123456789}
+    secret: ${JWT_SECRET_KEY:my-super-secret-key-that-is-32-chars-min}
 
 management:
   endpoints:
