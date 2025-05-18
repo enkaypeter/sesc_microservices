@@ -6,6 +6,8 @@ import dev.enkay.student_service.config.SecurityConfig;
 import dev.enkay.student_service.dto.enrolment.CourseInfoInEnrolment;
 import dev.enkay.student_service.dto.enrolment.EnrolmentRequest;
 import dev.enkay.student_service.dto.enrolment.EnrolmentResponse;
+import dev.enkay.student_service.repository.UserRepository;
+import dev.enkay.student_service.security.JwtService;
 import dev.enkay.student_service.service.EnrolmentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,13 @@ class EnrolmentControllerTest {
 
   @MockBean
   private EnrolmentService enrolmentService;
+
+  @MockBean
+  private JwtService jwtService;
+
+  @MockBean
+  private UserRepository  userRepository;
+
 
   @Autowired
   private ObjectMapper objectMapper;

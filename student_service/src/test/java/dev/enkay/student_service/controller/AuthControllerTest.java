@@ -1,90 +1,90 @@
 package dev.enkay.student_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.enkay.student_service.dto.auth.AuthResponse;
 import dev.enkay.student_service.dto.auth.LoginRequest;
 import dev.enkay.student_service.dto.auth.RegisterRequest;
-import dev.enkay.student_service.dto.auth.TokenInfo;
-import dev.enkay.student_service.dto.auth.UserInfo;
-import dev.enkay.student_service.service.AuthService;
-import dev.enkay.student_service.config.SecurityConfig;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import java.util.Base64;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import static dev.enkay.student_service.utils.TestAuthConstants.*;
 
-@WebMvcTest(controllers = AuthController.class)
-@Import(SecurityConfig.class)
-
+@Testcontainers
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
 class AuthControllerTest {
+
+  @Container
+  static PostgreSQLContainer<?> postgres =
+    new PostgreSQLContainer<>("postgres:14")
+      .withDatabaseName("students")
+      .withUsername("sa")
+      .withPassword("sa");
+
+  // Wire the container’s JDBC URL into Spring’s datasource
+  @DynamicPropertySource
+  static void overrideProps(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgres::getJdbcUrl);
+    registry.add("spring.datasource.username", postgres::getUsername);
+    registry.add("spring.datasource.password", postgres::getPassword);
+  }
 
   @Autowired
   private MockMvc mockMvc;
-
-  @MockBean
-  private AuthService authService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   @Test
-  @WithMockUser
-  void shouldRegisterSuccessfully() throws Exception {
-      RegisterRequest request = new RegisterRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
+  void registerShouldPersistAndReturnTokenAndUser() throws Exception {
+    var request = new RegisterRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
 
-      TokenInfo tokenInfo = new TokenInfo(MOCK_JWT_TOKEN, 86400L);
-      UserInfo userInfo = new UserInfo(MOCK_USER_ID, MOCK_EMAIL, "STUDENT");
-      AuthResponse response = new AuthResponse(tokenInfo, userInfo, "Registration successful");
-
-      when(authService.register(any())).thenReturn(response);
-
-      mockMvc.perform(post("/api/auth/register")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request)))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.token.accessToken").value(MOCK_JWT_TOKEN))
-          .andExpect(jsonPath("$.token.expiresAt").value(86400))
-          .andExpect(jsonPath("$.user.email").value(MOCK_EMAIL))
-          .andExpect(jsonPath("$.user.role").value("STUDENT"))
-          .andExpect(jsonPath("$.message").value("Registration successful"));
+    mockMvc.perform(post("/api/auth/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.token.accessToken").isNotEmpty())
+      .andExpect(jsonPath("$.token.expiresAt").isNumber())
+      .andExpect(jsonPath("$.user.email").value(MOCK_EMAIL))
+      .andExpect(jsonPath("$.user.id").isNumber())
+      .andExpect(jsonPath("$.user.role").value("STUDENT"))
+      .andExpect(jsonPath("$.message").value("Registration successful"));    
   }
 
   @Test
-  @WithMockUser
-  void shouldLoginSuccessfully() throws Exception {
-    // Arrange
-    LoginRequest request = new LoginRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
+  void loginShouldReturnExistingUserToken() throws Exception {
+    // First register so there is an account to log into
+    var register = new RegisterRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
+    mockMvc.perform(post("/api/auth/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(register)))
+        .andExpect(status().isOk());
 
-    TokenInfo tokenInfo = new TokenInfo(MOCK_JWT_TOKEN, 86400L);
-    UserInfo userInfo = new UserInfo(MOCK_USER_ID, MOCK_EMAIL, "STUDENT");
-
-    AuthResponse response = new AuthResponse(tokenInfo, userInfo, MOCK_LOGIN_SUCCESS);
-
-    when(authService.login(any())).thenReturn(response);
-
-    // Act + Assert
+    var loginReq = new LoginRequest(MOCK_EMAIL, MOCK_RAW_PASSWORD);
     mockMvc.perform(post("/api/auth/login")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.token.accessToken").value(MOCK_JWT_TOKEN))
-        .andExpect(jsonPath("$.token.expiresAt").value(86400))
-        // .andExpect(jsonPath("$.user.id").value(MOCK_USER_ID))
-        .andExpect(jsonPath("$.user.email").value(MOCK_EMAIL))
-        .andExpect(jsonPath("$.user.role").value("STUDENT"))
-        .andExpect(jsonPath("$.message").value(MOCK_LOGIN_SUCCESS));
+        .content(objectMapper.writeValueAsString(loginReq)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.token.accessToken").isNotEmpty())
+      .andExpect(jsonPath("$.user.email").value(MOCK_EMAIL))
+      .andExpect(jsonPath("$.user.role").value("STUDENT"))
+      .andExpect(jsonPath("$.message").value(MOCK_LOGIN_SUCCESS));
   }
-
 }
