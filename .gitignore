@@ -9,6 +9,17 @@ student_service/.env
 student_service/application.properties
 docker-compose/*.env
 
+# Terraform
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/*.tfvars
+
+
+# Ansible
+ansible/*.ini
+
 # OS files
 .DS_Store
 
