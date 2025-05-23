@@ -16,6 +16,12 @@ terraform/.terraform/
 terraform/.terraform.lock.hcl
 terraform/*.tfvars
 
+docker-compose/grafana/datasources
+docker-compose/observability/grafana/provisioning
+docker-compose/observability/loki/storage
+docker-compose/observability/loki/wal
+
+
 
 # Ansible
 ansible/*.ini

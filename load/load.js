@@ -48,8 +48,6 @@ function vuEmail() {
   4.  MAIN USER FLOW
   ────────────────────────────────────────────*/
 export default function () {
-  const flowStart = Date.now();           // for iteration duration
-
   // 1. Register
   const regRes = http.post(`${STUDENT_BASE}/api/auth/register`, JSON.stringify({
     email: vuEmail(),
