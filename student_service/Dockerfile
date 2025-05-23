@@ -10,7 +10,7 @@ WORKDIR /app
 
 # Copy the built JAR file from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.16.0/opentelemetry-javaagent.jar .
 
 EXPOSE 8081
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-javaagent:opentelemetry-javaagent.jar", "-jar", "app.jar"]

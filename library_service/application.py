@@ -22,6 +22,7 @@ from errors.errors import IncompleteBookError, NotValidISBNError
 
 from helpers import *
 
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 
@@ -29,6 +30,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
+PrometheusMetrics(app)
 # Ensure responses aren't cached
 @app.after_request
 def after_request(response):
