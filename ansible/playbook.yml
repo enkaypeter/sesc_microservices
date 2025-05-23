@@ -1,0 +1,77 @@
+---
+- name: Provision SESC microservices stack on Azure VM
+  hosts: azure_vm
+  become: yes
+
+  vars:
+    env_files_local_path: "/Users/enkaypeter/Documents/Lab/assessments/sesc/docker-compose"
+    env_files:
+      - .env
+      - .library.app.env
+      - .finance.app.env
+      - .student.app.env
+    remote_env_dir: "/opt/sesc_microservices/docker-compose"
+
+  tasks:
+    - name: Ensure required packages are installed
+      apt:
+        name:
+          - docker.io
+          - git
+          - make
+        update_cache: yes
+        state: present
+
+    - name: Install Docker Compose
+      shell: |
+        mkdir -p ~/.docker/cli-plugins
+        curl -SL https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+        chmod +x ~/.docker/cli-plugins/docker-compose
+      args:
+        executable: /bin/bash
+
+    - name: Symlink docker-compose to /usr/local/bin
+      file:
+        src: /root/.docker/cli-plugins/docker-compose
+        dest: /usr/local/bin/docker-compose
+        state: link
+        force: yes
+
+    - name: Create Docker network sesc_infra_net if it doesn't exist
+      command: docker network create sesc_infra_net
+      register: create_network_result
+      failed_when: create_network_result.rc != 0 and 'already exists' not in create_network_result.stderr
+      changed_when: "'already exists' not in create_network_result.stderr"
+
+    - name: Clone sesc_microservices repository
+      git:
+        repo: https://github.com/enkaypeter/sesc_microservices.git
+        dest: /opt/sesc_microservices
+        version: main
+
+    - name: Ensure remote docker-compose directory exists
+      file:
+        path: "{{ remote_env_dir }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user | default('azure_remote_user') }}"
+        group: "{{ ansible_user | default('azure_remote_user') }}"
+
+    - name: Copy .env files for application services
+      copy:
+        src: "{{ env_files_local_path }}/{{ item }}"
+        dest: "{{ remote_env_dir }}/{{ item }}"
+        owner: "{{ ansible_user | default('azure_remote_user') }}"
+        group: "{{ ansible_user | default('azure_remote_user') }}"
+        mode: '0644'
+      loop: "{{ env_files }}"
+
+    - name: Run make infra
+      command: make infra
+      args:
+        chdir: /opt/sesc_microservices
+
+    - name: Run make app
+      command: make app
+      args:
+        chdir: /opt/sesc_microservices

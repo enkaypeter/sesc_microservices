@@ -1,7 +1,8 @@
 INFRA_COMPOSE=./docker-compose/docker-compose.infra.yml
 APP_COMPOSE=./docker-compose/docker-compose.app.yml
+OBS_COMPOSE=./docker-compose/docker-compose.obs.yml
 
-.PHONY: up down build logs infra app restart help
+.PHONY: up down build logs infra obs app restart help
 
 help:
 	@echo "Usage:"
@@ -17,6 +18,9 @@ help:
 infra:
 	docker compose -f $(INFRA_COMPOSE) up -d
 
+obs:
+	docker compose -f $(OBS_COMPOSE) up -d
+
 app:
 	docker compose -f $(APP_COMPOSE) up -d
 app-build:
@@ -25,7 +29,7 @@ app-build:
 up:
 	docker compose -f $(INFRA_COMPOSE) -f $(APP_COMPOSE) up -d
 down:
-	docker compose -f $(INFRA_COMPOSE) -f $(APP_COMPOSE) down
+	docker compose -f $(INFRA_COMPOSE) -f $(APP_COMPOSE) -f $(OBS_COMPOSE)  down
 down-app:
 	docker compose -f $(APP_COMPOSE) down --volumes --remove-orphans
 down-v:
@@ -33,7 +37,7 @@ down-v:
 
 
 build:
-	docker compose -f $(INFRA_COMPOSE) -f $(APP_COMPOSE) build
+	docker compose -f $(INFRA_COMPOSE) -f $(APP_COMPOSE) -f $(OBS_COMPOSE) build
 
 restart:
 	make down

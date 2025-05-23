@@ -11,15 +11,15 @@ spring:
     consul:
       host: consul
       port: 8500
-    discovery:
-      service-name: ${spring.application.name}
-      health-check-path: /actuator/health
-      health-check-interval: 10s
-      deregister-critical-service-after: 30s
-      prefer-ip-address: false
-      locator:
-        enabled: true
-        lower-case-service-id: true
+      discovery:
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        deregister-critical-service-after: 30s
+        prefer-ip-address: false
+        locator:
+          enabled: true
+          lower-case-service-id: true
 
     gateway:
       default-filters:
@@ -64,4 +64,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health, info, prometheus
+  endpoint:
+    prometheus: 
+      access: UNRESTRICTED
+

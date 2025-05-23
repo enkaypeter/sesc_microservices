@@ -6,6 +6,10 @@ services:
     container_name: api-gateway
     ports:
       - "300:80"
+    environment:
+      OTEL_SERVICE_NAME: api-gateway
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317 
+
     networks:
       sesc_infra_net:
         aliases:
@@ -18,6 +22,9 @@ services:
       context: ../student_service
       dockerfile: Dockerfile
     container_name: student-service
+    environment:
+      OTEL_SERVICE_NAME: student-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317 
     env_file:
       - .student.app.env
     ports:
@@ -32,6 +39,10 @@ services:
     build:
       context: ../finance_service
       dockerfile: Dockerfile
+    environment:
+      OTEL_SERVICE_NAME: finance-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317 
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     env_file:
       - .finance.app.env
     ports:
@@ -60,6 +71,8 @@ services:
       sesc_app_net:
 networks:
   sesc_infra_net:
+    external: true
+  observability:
     external: true
   sesc_app_net:
     driver: bridge

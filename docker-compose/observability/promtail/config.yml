@@ -1,0 +1,47 @@
+server:
+  http_listen_port: 9080
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # ───────────────────────────────────────────────
+  # 1) Tail only Docker JSON logs, give them labels
+  # ───────────────────────────────────────────────
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      # only keep JSON‐file logs
+      - source_labels: [__meta_docker_container_log_driver]
+        regex: json-file
+        action: keep
+
+      # label the stream with container & service names
+      - source_labels: [__meta_docker_container_name]
+        target_label: container
+      - source_labels: [__meta_docker_container_label_com_docker_swarm_service_name]
+        target_label: service
+
+      # finally set the path to the container’s log file
+      - action: replace
+        source_labels: [__meta_docker_container_log_file]
+        target_label: __path__
+
+  # ───────────────────────────────────────────────
+  # 2) (Optional) Tail only syslog/auth logs you actually can read
+  # ───────────────────────────────────────────────
+  - job_name: host-logs
+    static_configs:
+      - targets: ["localhost"]
+        labels:
+          job: hostlogs
+          __path__: /var/log/syslog
+      - targets: ["localhost"]
+        labels:
+          job: hostlogs
+          __path__: /var/log/auth.log

@@ -1,0 +1,55 @@
+receivers:
+  # OTLP from your instrumented apps
+  otlp:
+    protocols:
+      grpc:  { endpoint: 0.0.0.0:4317 }
+      http:  { endpoint: 0.0.0.0:4318 }
+
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'sesc-apps'
+          static_configs:
+            - targets:
+                - api-gateway:80
+                - student-service:8080
+                - finance-service:8080
+                - library-service:80
+
+processors:
+  batch:
+    timeout: 10s            
+
+connectors:
+  spanmetrics:
+    histogram:
+      explicit:
+        buckets: [0.05s, 0.1s, 0.25s, 0.5s, 1s, 5s]
+    dimensions:
+      - name: http.method
+      - name: http.status_code
+
+exporters:
+  # raw span stream to Tempo
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # make the span-derived metrics (and any scraped metrics) available for Grafana
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: sesc
+
+service:
+  pipelines:
+    traces:
+      receivers:  [otlp]
+      processors: [batch]
+      exporters:  [spanmetrics, otlp/tempo]    # send to connector **and** Tempo
+
+    # spanmetrics re-emits the converted series as a *receiver* called spanmetrics
+    metrics:
+      receivers:  [spanmetrics, prometheus]    # combine both sources
+      processors: []
+      exporters:  [prometheus]

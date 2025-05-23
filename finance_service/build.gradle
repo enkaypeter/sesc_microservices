@@ -25,6 +25,7 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.22'
     implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation "io.micrometer:micrometer-registry-prometheus"
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -33,6 +34,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    
 }
 
 test {

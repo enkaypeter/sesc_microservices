@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'otel-collector'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['otel-collector:8889']
+
+  - job_name: 'sesc-jvm-services'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - 'api-gateway:80'
+          - 'student-service:8080'
+          - 'finance-service:8080'
+  - job_name: 'sesc-python-services'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'library-service:80'
